@@ -9,31 +9,26 @@
 #define Y 0.04642
 #define Z 21.0
 
-double deg2rad(double deg)
-{
-    return deg * M_PI / 180.0;
-}
-
 double expression(double x, double y, double z)
 {
     double result = 
-        log(pow(y, -sqrt(abs(x)))) *
+        log(pow(y, -sqrt(fabs(x)))) *
         (x - y / 2.0) + 
-        pow(deg2rad(sin(atan(deg2rad(z)))), 2);
-
-    
+        pow(sin(atan(z)), 2.0);
 
     return result;
 }
 
 int main(void)
 {
+    printf("X: %lg\nY: %lg\nZ: %lg\n", X, Y, Z);
+
     // При запуске было равно -182.038 .
-    printf("Значение для сравнения: %g\n", 
+    printf("Желаемое значение: %lg\n", 
         VALUE_TO_COMPARE_TO);
 
     // При запуске было равно -181.553 .
-    printf("Значение выражения: %g\n",
+    printf("Значение выражения: %lg\n",
         expression(X, Y, Z));
 
     return 0;
