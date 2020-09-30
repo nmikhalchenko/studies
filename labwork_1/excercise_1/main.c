@@ -25,4 +25,6 @@ int main(void)
         EXPONENT, 
         MULTIPLIER, 
         powf(x, EXPONENT) * MULTIPLIER);
+
+    return 0;
 }

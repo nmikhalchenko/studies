@@ -35,4 +35,6 @@ int main(void)
     // При запуске было равно -181.553 .
     printf("Значение выражения: %g\n",
         expression(X, Y, Z));
+
+    return 0;
 }
