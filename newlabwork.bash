@@ -23,7 +23,7 @@ if [ ${SUBDIR_COUNT} -gt 0 ]
 
             echo '#!/bin/bash
 
-gcc ./*c -lm -o output.out' > ${NEWSUB}/build.bash
+../../buildtemplate.bash ./' > ${NEWSUB}/build.bash
 
             chmod a+x ${NEWSUB}/build.bash
 

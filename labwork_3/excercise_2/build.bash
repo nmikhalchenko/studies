@@ -1,3 +1,3 @@
 #!/bin/bash
 
-gcc ./*c -lm -o output.out
+../../buildtemplate.bash ./
