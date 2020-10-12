@@ -35,7 +35,7 @@ int main(void)
     float input = 0.0f;
     scanf("%f", &input);
 
-    printf("Вы ввели значение: %f\n", input);
+    printf("Вы ввели значение: %i\n", (int)input);
 
     int checkedInput = 0;
 
