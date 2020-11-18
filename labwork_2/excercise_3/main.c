@@ -19,7 +19,8 @@ typedef enum
     Month_September,
     Month_October,
     Month_November,
-    Month_December
+    Month_December,
+    Month_Unknown
 }
 Month;
 
@@ -87,6 +88,7 @@ const char* translateMonthEnum(Month value)
         case Month_December:
             return "Декабрь";
     }
+    return "Unknown month";
 }
 
 Season parseSeason(const char* seasonName)

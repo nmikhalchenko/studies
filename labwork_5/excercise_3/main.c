@@ -13,7 +13,7 @@ int indexOfFirstRowWithPositiveElement(int rowCount, int colCount, int matrix[ro
         bool hasPositive = false;
         for (int j = 0; j < colCount; j++)
         {
-            if (hasPositive = (matrix[i][j] > 0))
+            if ((hasPositive = (matrix[i][j] > 0)))
             {
                 positiveIndex = i;
                 break;
