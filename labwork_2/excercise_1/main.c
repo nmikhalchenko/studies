@@ -3,45 +3,46 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "shared_code/shared_code.h"
 #include "trifuncs.h"
 
-Point pointFromInput(const char* pointName)
+Point requestPoint(const char* pointName)
 {
     Point p = {0, 0};
 
-    printf("Введите координату x точки %s:\n", pointName);
-    scanf("%lg", &p.x);
+    printf("Enter the x coordinate of %s:\n", pointName);
+    p.x = requestDouble(NULL);
 
-    printf("Введите координату y точки %s:\n", pointName);
-    scanf("%lg", &p.y);
+    printf("Enter the y coordinate of %s:\n", pointName);
+    p.y = requestDouble(NULL);
 
     return p;
 }
 
 int main(void)
 {
-    Point p1 = pointFromInput("A");
-    Point p2 = pointFromInput("B");
-    Point p3 = pointFromInput("C");
+    Point p1 = requestPoint("A");
+    Point p2 = requestPoint("B");
+    Point p3 = requestPoint("C");
 
     TriangleType tType = getTriangleType(p1, p2, p3);
 
     switch (tType)
     {
         case TriangleType_BadTriangle:
-            puts("Такой треугольник невозможен.");
+            puts("Impossible triangle.");
             break;
         
         case TriangleType_AcuteAngled:
-            puts("Треугольник остроугольный.");
+            puts("Acute-angled triangle.");
             break;
 
         case TriangleType_RightAngled:
-            puts("Треугольник прямоугольный.");
+            puts("Right-angled triangle.");
             break;
 
         case TriangleType_Obtuse:
-            puts("Треугольник тупоугольный.");
+            puts("Obtuse triangle.");
             break;
     }
 

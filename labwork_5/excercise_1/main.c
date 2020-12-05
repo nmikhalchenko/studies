@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <math.h>
 
+#include "shared_code/shared_code.h"
+
 int getPositiveRowSum(int rang, int sqMatrix[rang][rang])
 {
     if (!sqMatrix)
@@ -92,24 +94,23 @@ void printPositiveRowSumAndMinimalParallelDiagonalSum(int rang,
             rang, sqMatrix, parallelDiagonalSums, parallelDiagonalSumCount), 
         parallelDiagonalSumCount);
 
-    printf("Сумма элементов в строках без отрицательных элементов: %i\n", positiveRowSum);
-    printf("Минимальная из сумм элементов параллельных диагоналей: %i\n", minParallelDiagonalSum);
+    printf("Sum of rows without negative elements: %i\n", positiveRowSum);
+    printf("Minimal parallel diagonal sum: %i\n", minParallelDiagonalSum);
 }
-
-#define RANG (5)
 
 int main(void)
 {
-    int arr[RANG][RANG] =
-    {
-       { 1,  2,  3, 20,   5 },
-       {-1,  0, 100, 5,  32 },
-       {25,  5, 67,  7,  64 },
-       {30,  3,  6,  2,  101},
-       { 4, 25, 10, 222, 57 }
-    };
+    int size = requestSize("Enter matrix size (higher than zero): ");
+    int* matrix = (int*)calloc(size * size, sizeof(int));
 
-    printPositiveRowSumAndMinimalParallelDiagonalSum(RANG, arr);
+    requestIntMatrix(size, size, matrix, NULL, true);
+    puts("Matrix:");
+    printIntMatrix(size, size, matrix, true);
+    puts("");
+
+    printPositiveRowSumAndMinimalParallelDiagonalSum(size, matrix);
+
+    free(matrix);
 
     return 0;
 }

@@ -23,12 +23,10 @@ int main(void)
 {
     printf("X: %lg\nY: %lg\nZ: %lg\n", X, Y, Z);
 
-    // При запуске было равно -182.038 .
-    printf("Желаемое значение: %lg\n", 
+    printf("Demanded value: %lg\n", 
         VALUE_TO_COMPARE_TO);
 
-    // При запуске было равно -181.553 .
-    printf("Значение выражения: %lg\n",
+    printf("Expression value: %lg\n",
         expression(X, Y, Z));
 
     return 0;

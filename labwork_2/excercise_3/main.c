@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define SEASON_COUNT 4
+#include "shared_code/shared_code.h"
 
 typedef enum
 {
@@ -43,7 +43,7 @@ typedef struct
 }
 MonthsOfSeason;
 
-int equal(const char* s1, const char* s2)
+int strEqual(const char* s1, const char* s2)
 {
     return strcmp(s1, s2) == 0 ? 1 : 0;
 }
@@ -53,69 +53,64 @@ const char* translateMonthEnum(Month value)
     switch (value)
     {
         case Month_January:
-            return "Январь";
+            return "January";
 
         case Month_February:
-            return "Февраль";
+            return "February";
 
         case Month_March:
-            return "Март";
-        
+            return "March";
+
         case Month_April:
-            return "Апрель";
+            return "April";
 
         case Month_May:
-            return "Май";
+            return "May";
 
         case Month_June:
-            return "Июнь";
+            return "June";
 
         case Month_July:
-            return "Июль";
+            return "July";
 
         case Month_August:
-            return "Август";
+            return "August";
 
         case Month_September:
-            return "Сентябрь";
+            return "September";
 
         case Month_October:
-            return "Октябрь";
+            return "October";
 
         case Month_November:
-            return "Ноябрь";
+            return "November";
 
         case Month_December:
-            return "Декабрь";
+            return "December";
+
+	    case Month_Unknown:
+	        return "Unknown month";
     }
+
     return "Unknown month";
 }
 
 Season parseSeason(const char* seasonName)
 {
-    
-    if ((equal(seasonName, "зима")) ||
-        (equal(seasonName, "Зима")) ||
-        (equal(seasonName, "winter")) ||
-        (equal(seasonName, "Winter")))
+    if (strEqual(seasonName, "winter") ||
+        strEqual(seasonName, "Winter"))
         return Season_Winter;
 
-    if ((equal(seasonName, "весна")) ||
-        (equal(seasonName, "Весна")) ||
-        (equal(seasonName, "spring")) ||
-        (equal(seasonName, "Spring")))
+    if (strEqual(seasonName, "spring") ||
+        strEqual(seasonName, "Spring"))
         return Season_Spring;
 
-    if ((equal(seasonName, "лето")) ||
-        (equal(seasonName, "Лето")) ||
-        (equal(seasonName, "summer")) ||
-        (equal(seasonName, "Summer")))
+    if (strEqual(seasonName, "summer") ||
+        strEqual(seasonName, "Summer"))
         return Season_Summer;
 
-    if ((equal(seasonName, "осень")) ||
-        (equal(seasonName, "Осень")) ||
-        (equal(seasonName, "autumn")) ||
-        (equal(seasonName, "Autumn")))
+    if (strEqual(seasonName, "autumn") ||
+        strEqual(seasonName, "Autumn"))
         return Season_Autumn;
 
     return Season_Unknown;
@@ -123,6 +118,8 @@ Season parseSeason(const char* seasonName)
 
 int main(void)
 {
+    #define SEASON_COUNT (4)
+
     MonthsOfSeason months[SEASON_COUNT] =
     {
         {
@@ -151,15 +148,14 @@ int main(void)
         }
     };
 
-    char buffer[64];
-    
-    puts("Введите название времени года:");
-    scanf("%s", buffer);
+    #define BUFFER_SIZE (64)
+    char buffer[BUFFER_SIZE] = {0};
+    requestString(BUFFER_SIZE, buffer, "Enter the season's name: ");
 
     Season season = parseSeason(buffer);
     if (season == Season_Unknown)
     {
-        puts("Неизвестное время года.");
+        puts("Unknown season.");
         return -1;
     }
 

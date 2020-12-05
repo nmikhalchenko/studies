@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <math.h>
 
+#include "shared_code/shared_code.h"
 #include "point.h"
 
 #define CIRCLE_RADIUS 1.0f
@@ -27,27 +28,24 @@ int isPointInCircleTop(Point p)
     return dist > CIRCLE_RADIUS ? 0 : 1;
 }
 
-Point readPoint(void)
+Point requestPoint()
 {
-    Point p = {0.0f, 0.0f};
+    Point p = {0, 0};
 
-    puts("Введите координату x точки: ");
-    scanf("%f", &p.x);
-
-    puts("Введите координату y точки: ");
-    scanf("%f", &p.y);
+    p.x = requestDouble("Enter the x coordinate: ");
+    p.y = requestDouble("Enter the y coordinate: ");
 
     return p;
 }
 
 int main(void)
 {
-    Point p = readPoint();
+    Point p = requestPoint();
     printf("%f, %f\n", p.x, p.y);
     if (isPointInCircleTop(p))
-        puts("Точка находится в верхней части круга.");
+        puts("The point is inside the circle's upper half.");
     else
-        puts("Точка не находится в верхней части круга.");
+        puts("The point is not inside the circle's upper half.");
 
     return 0;
 }

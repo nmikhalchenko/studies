@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <math.h>
 
+#include "shared_code/shared_code.h"
+
 int isNaturalNumber(float n)
 {
     if (n <= 0.0f)
@@ -16,7 +18,7 @@ int isNaturalNumber(float n)
     return 1;
 }
 
-int getPopulationTripleYear(int n)
+int yearsUntilTriple(int n)
 {
     int counter = 0;
     for (int i = 0; i < n * 2; i++)
@@ -29,26 +31,24 @@ int getPopulationTripleYear(int n)
 
 int main(void)
 {
-    puts("Население города ежегодно увеличивается на 1 / n.");
-    puts("Введите значение натурального числа n:");
+    puts("The city's population increases by 1 / n every year.");
+    float input = requestFloat("Enter the value of the natural number n: ");
 
-    float input = 0.0f;
-    scanf("%f", &input);
-
-    printf("Вы ввели значение: %i\n", (int)input);
+    printf("Received value: %i\n", (int)input);
 
     int checkedInput = 0;
 
     if (!isNaturalNumber(input))
     {
-        puts("Ошибка: введено ненатуральное число!");
+        puts("The value received is not natural. Exiting.");
         return -1;
     }
 
     checkedInput = (int)input;
+    int years = yearsUntilTriple(checkedInput);
 
-    printf("Население города утроится через %i лет.\n",
-        getPopulationTripleYear(checkedInput));
+    printf("The city's population will triple in %i %s.\n",
+        years, years == 1 ? "year" : "years");
 
     return 0;
 }

@@ -3,24 +3,18 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include <locale.h>
+
+#include "shared_code/shared_code.h"
 
 #define MULTIPLIER 2
 #define EXPONENT 8
 
 int main(void)
 {
-    // Вызов этой функции не изменяет
-    // ход выполнения программы.
-    //
-    //setlocale(LC_ALL, "Russian");
-
-    float x;
-    puts("Введите число:");
-    scanf("%f", &x);
+    float x = requestFloat("Enter a number: ");
 
     printf(
-        "Число %f в степени %i, умноженное на %i: %f\n", 
+        "(%f ^ %i) * %i = %f\n", 
         x, 
         EXPONENT, 
         MULTIPLIER, 

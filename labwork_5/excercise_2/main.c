@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "shared_code/shared_code.h"
+
 int countColumnsWithoutZeroes(int rowCount, int colCount, int matrix[rowCount][colCount])
 {
     int count = 0;
@@ -27,19 +29,14 @@ int countColumnsWithoutZeroes(int rowCount, int colCount, int matrix[rowCount][c
 
 int main(void)
 {
-    #define ROWS (5)
-    #define COLS (4)
+    int rows = requestSize("Enter row amount (higher than zero): ");
+    int cols = requestSize("Enter column amount (higher than zero): ");
+    int* matrix = (int*)calloc(rows * cols, sizeof(int));
 
-    int matrix[ROWS][COLS] =
-    {
-        {2, 3, 4, 1},
-        {1, 0, 3, 0},
-        {1, 0, 2, 0},
-        {2, 3, 4, 5},
-        {1, 2, 5, 1}
-    };
+    requestIntMatrix(rows, cols, matrix, NULL, true);
+    printf("Zeroless column count: %i\n", countColumnsWithoutZeroes(rows, cols, matrix));
 
-    printf("Column without zeroes count: %i\n", countColumnsWithoutZeroes(ROWS, COLS, matrix));
+    free(matrix);
 
     return 0;
 }
