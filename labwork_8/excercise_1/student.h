@@ -1,22 +1,25 @@
 #ifndef STUDENT_H
 #define STUDENT_H
 
-#define MAX_STUDENT_FIELDS (5)
+#define MAX_STUDENT_FIELDS (6)
+#define MAX_STUDENT_FIELD_SIZE (32)
 
 typedef enum
 {
-    StudentField_firstName,
-    StudentField_lastName,
-    StudentField_fatherName,
-    StudentField_groupName,
-    StudentField_rating
+    StudentFieldIndex_firstName,
+    StudentFieldIndex_lastName,
+    StudentFieldIndex_fatherName,
+    StudentFieldIndex_homeAddress,
+    StudentFieldIndex_groupName,
+    StudentFieldIndex_rating
 
-} StudentField;
+} StudentFieldIndex;
+
+typedef char (StudentField)[MAX_STUDENT_FIELD_SIZE];
 
 typedef struct
 {
-    //NullTerminatedString keys[MAX_STUDENT_FIELDS];
-    const char* fields[MAX_STUDENT_FIELDS];
+    StudentField fields[MAX_STUDENT_FIELDS];
 
 } Student;
 

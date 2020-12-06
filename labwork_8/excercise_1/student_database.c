@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <memory.h>
@@ -8,48 +9,75 @@
 
 typedef Student* StudentPointer;
 typedef __compar_fn_t StudentComparer;
+typedef int (*StudentSearcher)(const Student* left, const Student* right);
 
-static int stringComparer(StudentField field, const void* left, const void* right);
-static int intComparer(StudentField field, const void* left, const void* right);
+static int stringComparer(StudentFieldIndex field, const void* left, const void* right);
+static int intComparer(StudentFieldIndex field, const void* left, const void* right);
+static int stringSearcher(StudentFieldIndex field, const Student* left, const Student* right);
+static int intSearcher(StudentFieldIndex field, const Student* left, const Student* right);
 
 #define DEFINE_STRING_COMPARER(field)\
 static int field##Comparer(const StudentPointer* left, const StudentPointer* right)\
 {\
-    return stringComparer(StudentField_##field, left, right);\
+    return stringComparer(StudentFieldIndex_##field, left, right);\
 }
 
 #define DEFINE_INT_COMPARER(field)\
 static int field##Comparer(const StudentPointer* left, const StudentPointer* right)\
 {\
-    return intComparer(StudentField_##field, left, right);\
+    return intComparer(StudentFieldIndex_##field, left, right);\
+}
+
+#define DEFINE_STRING_SEARCHER(field)\
+static int field##Searcher(const Student* left, const Student* right)\
+{\
+    return stringSearcher(StudentFieldIndex_##field, left, right);\
+}
+
+#define DEFINE_INT_SEARCHER(field)\
+static int field##Searcher(const Student* left, const Student* right)\
+{\
+    return intSearcher(StudentFieldIndex_##field, left, right);\
 }
 
 #define GET_COMPARER(field) (&field##Comparer)
+#define GET_SEARCHER(field) (&field##Searcher)
 
 typedef struct
 {
     const char* name;
     StudentComparer comparer;
+    StudentSearcher searcher;
 
 } StudentFieldInfo;
 
 DEFINE_STRING_COMPARER(firstName);
 DEFINE_STRING_COMPARER(lastName);
 DEFINE_STRING_COMPARER(fatherName);
+DEFINE_STRING_COMPARER(homeAddress);
 DEFINE_STRING_COMPARER(groupName);
 DEFINE_INT_COMPARER(rating);
 
+DEFINE_STRING_SEARCHER(firstName);
+DEFINE_STRING_SEARCHER(lastName);
+DEFINE_STRING_SEARCHER(fatherName);
+DEFINE_STRING_SEARCHER(homeAddress);
+DEFINE_STRING_SEARCHER(groupName);
+DEFINE_INT_SEARCHER(rating);
+
 static const StudentFieldInfo g_fieldInfoTable[MAX_STUDENT_FIELDS] =
 {
-    {"First name",      GET_COMPARER(firstName)},
-    {"Last name",       GET_COMPARER(lastName)},
-    {"Patronymic",      GET_COMPARER(fatherName)},
-    {"Group",           GET_COMPARER(groupName)},
-    {"Rating",          GET_COMPARER(rating)}
+    {"First name",      GET_COMPARER(firstName),   GET_SEARCHER(firstName)  },
+    {"Last name",       GET_COMPARER(lastName),    GET_SEARCHER(lastName)   },  
+    {"Patronymic",      GET_COMPARER(fatherName),  GET_SEARCHER(fatherName) },
+    {"Home address",    GET_COMPARER(homeAddress), GET_SEARCHER(homeAddress)},
+    {"Group",           GET_COMPARER(groupName),   GET_SEARCHER(groupName)  },
+    {"Rating",          GET_COMPARER(rating),      GET_SEARCHER(rating)     }
 };
 
-static StudentPointer g_students[MAX_STUDENTS] = {0};
+static Student* g_students[MAX_STUDENTS] = {0};
 static int g_top = 0;
+static int g_count = 0;
 
 static bool isTopValid(void)
 {
@@ -85,7 +113,7 @@ static bool isIndexInRange(int index)
     return (index < MAX_STUDENTS) && (index >= 0);
 }
 
-static int resolveNullComparison(StudentPointer left, StudentPointer right)
+static int resolveNullComparison(Student* left, Student* right)
 {
     if (!left && !right) 
     {
@@ -99,14 +127,17 @@ static int resolveNullComparison(StudentPointer left, StudentPointer right)
         return 1;   
 }
 
-static int stringComparer(StudentField field, const void* left, const void* right)
+static int stringComparer(StudentFieldIndex field, const void* left, const void* right)
 {
-    StudentPointer l = *(StudentPointer*)left;
-    StudentPointer r = *(StudentPointer*)right;
+    Student* l = *(Student**)left;
+    Student* r = *(Student**)right;
+
+    int comparison = 0;
 
     if (!l || !r)
     {
-        return resolveNullComparison(l, r);
+        comparison = resolveNullComparison(l, r);
+        return comparison;
     }
 
     const char* lf = l->fields[field];
@@ -128,10 +159,30 @@ static int stringComparer(StudentField field, const void* left, const void* righ
     return 0;
 }
 
-static int intComparer(StudentField field, const void* left, const void* right)
+static int stringSearcher(StudentFieldIndex field, const Student* left, const Student* right)
 {
-    StudentPointer l = *(StudentPointer*)left;
-    StudentPointer r = *(StudentPointer*)right;
+    const Student* l = left;
+    const Student* r = right;
+
+    if (!r)
+    {
+        return 1;
+    }
+
+    const char* lf = l->fields[field];
+    const char* rf = r->fields[field];
+
+    if (strncmp(lf, rf, MAX_STUDENT_FIELD_SIZE) == 0)
+    {
+        return 0;
+    }
+    return 1;
+}
+
+static int intComparer(StudentFieldIndex field, const void* left, const void* right)
+{
+    Student* l = *(Student**)left;
+    Student* r = *(Student**)right;
 
     if (!l || !r)
     {
@@ -147,9 +198,28 @@ static int intComparer(StudentField field, const void* left, const void* right)
     return lnum - rnum;
 }
 
-bool Students_TryAdd(Student student, int* resultingIndex)
+static int intSearcher(StudentFieldIndex field, const Student* left, const Student* right)
 {
-    if (!resultingIndex)
+    const Student* l = left;
+    const Student* r = right;
+
+    if (!r)
+    {
+        return 1;
+    }
+
+    const char* lf = l->fields[field];
+    const char* rf = r->fields[field];
+
+    int lnum = atoi(lf);
+    int rnum = atoi(rf);
+
+    return lnum - rnum;
+}
+
+bool Students_TryAdd(const Student* student, int* resultingIndex)
+{
+    if (!student)
     {
         return false;
     }
@@ -163,12 +233,29 @@ bool Students_TryAdd(Student student, int* resultingIndex)
     }
 
     int index = g_top;
-    g_students[index] = (StudentPointer)malloc(sizeof(Student));
-    memcpy(g_students[index], &student, sizeof(Student));
+    g_students[index] = (Student*)malloc(sizeof(Student));
+
+    for (int i = 0; i < MAX_STUDENT_FIELDS; i++)
+    {
+        Student* s = g_students[index];
+        strncpy(s->fields[i], student->fields[i], MAX_STUDENT_FIELD_SIZE);
+        if (i == StudentFieldIndex_rating)
+        {
+            if ((strtol(s->fields[i], NULL, 0) == 0) && (s->fields[i][0] != '0'))
+            {
+                strncpy(s->fields[i], "0", MAX_STUDENT_FIELD_SIZE);
+            }
+        }
+    }
 
     tryAdvanceTop();
 
-    *resultingIndex = index;
+    if (resultingIndex)
+    {
+        *resultingIndex = index;
+    }
+
+    g_count++;
     return true;
 }
 
@@ -182,10 +269,35 @@ bool Students_TryRemove(int index)
     free(g_students[index]);
     g_students[index] = NULL;
     g_top = index;
+    g_count--;
     return true;
 }
 
-bool Students_TryGetStudentByIndex(int index, Student* output)
+bool Students_TryGetIndexByStudent(const Student* student, int* outputIndex)
+{
+    if (!student)
+    {
+        return false;
+    }
+
+    for (int i = 0; i < MAX_STUDENTS; i++)
+    {
+        Student* ptr = g_students[i];
+        if (!ptr)
+        {
+            continue;
+        }
+        if (g_students[i] == student)
+        {
+            *outputIndex = i;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool Students_TrySearchByIndex(int index, Student* output)
 {
     if (!isIndexInRange(index) || !g_students[index] || !output)
     {
@@ -203,11 +315,12 @@ void Students_PrintStudent(const Student* student)
         return;
     }
 
+    puts("[");
     for (int j = 0; j < MAX_STUDENT_FIELDS; j++)
     {
         printf("  %-20s: \"%s\"\n", g_fieldInfoTable[j].name, student->fields[j]);
     }
-    puts("");
+    puts("]");
 }
 
 void Students_Print(void)
@@ -215,32 +328,65 @@ void Students_Print(void)
     for (int i = 0; i < MAX_STUDENTS; i++)
     {
         StudentPointer p = g_students[i];
-        Students_PrintStudent(p);
+        if (p)
+        {
+            printf (" %i. ", i + 1);
+            Students_PrintStudent(p);
+        }
     }
 }
 
-void Students_SortBy(StudentField field)
+void Students_SortByField(StudentFieldIndex field)
 {
     qsort(g_students, MAX_STUDENTS, sizeof(StudentPointer), g_fieldInfoTable[field].comparer);
 }
 
-bool Students_TrySearchBy(StudentField field, const char* key, Student* output)
+int Students_SearchByField(StudentFieldIndex field, const char* key, int length, Student* outputArray, int* indexArray)
 {
-    if (!output)
+    if (!outputArray || !indexArray)
     {
-        return false;
+        return -1;
     }
 
     Student dummy = {0};
-    dummy.fields[field] = key;
-    StudentPointer result =
-        (StudentPointer)bsearch(&dummy, g_students, MAX_STUDENTS, sizeof(StudentPointer), g_fieldInfoTable[field].comparer);
+    strncpy(dummy.fields[field], key, MAX_STUDENT_FIELD_SIZE);
 
-    if (!result)
+    int out_i = 0;
+
+    for (int i = 0; (i < MAX_STUDENTS) && (out_i < length); i++)
     {
-        return false;
+        Student* cur = g_students[i];
+        if (!cur)
+        {
+            continue;
+        }
+        int comparison = g_fieldInfoTable[field].searcher(&dummy, cur);
+        if (comparison == 0)
+        {
+            outputArray[out_i] = *cur;
+            indexArray[out_i] = i + 1;
+            out_i++;
+        }
     }
-    
-    *output = *result;
-    return true;
+    printf("out_i: %i\n", out_i);
+    return out_i;
+}
+
+char* Students_FieldNameToString(StudentFieldIndex field, bool toLower, int length, char* output)
+{
+    int buflen = strlen(g_fieldInfoTable[field].name) + 1;
+    char buffer[buflen];
+    strncpy(buffer, g_fieldInfoTable[field].name, buflen);
+    buffer[buflen - 1] = '\0';
+    if (toLower)
+    {
+        buffer[0] = (char)tolower(buffer[0]);
+    }
+    strncpy(output, buffer, length);
+    return output;
+}
+
+int Students_GetCount(void)
+{
+    return g_count;
 }

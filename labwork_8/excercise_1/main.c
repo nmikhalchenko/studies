@@ -2,14 +2,12 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <unistd.h>
-#include <signal.h>
-#include <execinfo.h>
 
-#include "student_database.h"
+#include "menu.h"
 
 int main(void)
 {
+    loop();
 
     return 0;
 }

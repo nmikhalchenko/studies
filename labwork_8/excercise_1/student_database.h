@@ -5,14 +5,17 @@
 
 #include "student.h"
 
-#define MAX_STUDENTS (8)
+#define MAX_STUDENTS (128)
 
-bool    Students_TryAdd                (Student student, int* resultingIndex);
-bool    Students_TryRemove             (int index);
-bool    Students_TryGetStudentByIndex  (int index, Student* output);
-void    Students_PrintStudent          (const Student* student);
-void    Students_Print                 (void);
-void    Students_SortBy                (StudentField field);
-bool    Students_TrySearchBy           (StudentField field, const char* key, Student* output);
+bool        Students_TryAdd                 (const Student* student, int* outputIndex);
+bool        Students_TryRemove              (int index);
+bool        Students_TryGetIndexByStudent   (const Student* student, int* outputIndex);
+bool        Students_TrySearchByIndex       (int index, Student* output);
+void        Students_PrintStudent           (const Student* student);
+void        Students_Print                  (void);
+void        Students_SortByField            (StudentFieldIndex field);
+int         Students_SearchByField          (StudentFieldIndex field, const char* key, int length, Student* outputArray, int* indexArray);
+char*       Students_FieldNameToString      (StudentFieldIndex field, bool toLower, int length, char* output);
+int         Students_GetCount               (void);
 
 #endif // STUDENT_DATABASE_H
