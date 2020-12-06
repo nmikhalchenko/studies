@@ -1,8 +1,6 @@
 #ifndef STUDENT_H
 #define STUDENT_H
 
-typedef const char* NullTerminatedString;
-
 #define MAX_STUDENT_FIELDS (5)
 
 typedef enum
@@ -18,7 +16,7 @@ typedef enum
 typedef struct
 {
     //NullTerminatedString keys[MAX_STUDENT_FIELDS];
-    NullTerminatedString fields[MAX_STUDENT_FIELDS];
+    const char* fields[MAX_STUDENT_FIELDS];
 
 } Student;
 
