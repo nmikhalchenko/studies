@@ -9,8 +9,9 @@ double  requestDouble       (const char* nullableMsg);
 float   requestFloat        (const char* nullableMsg);
 int     requestInt          (const char* nullableMsg);
 int     requestSize         (const char* nullableMsg);
+bool    tryRequestSize      (const char* nullableMsg, int* output);
 
-void    requestString       (int length, char* output, const char* nullableMsg);
+char*   requestString       (int length, char* output, const char* nullableMsg);
 
 void    requestDoubleArray  (int length, double* array, const char* nullableMsg, bool showElemMsgs);
 void    requestFloatArray   (int length, float* array, const char* nullableMsg, bool showElemMsgs);

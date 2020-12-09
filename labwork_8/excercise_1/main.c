@@ -5,6 +5,11 @@
 
 #include "menu.h"
 
+/*
+    This has been written in a hurry, so
+    expect this code to be a total mess.
+*/
+
 int main(void)
 {
     loop();

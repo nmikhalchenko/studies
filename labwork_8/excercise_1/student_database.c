@@ -261,16 +261,35 @@ bool Students_TryAdd(const Student* student, int* resultingIndex)
 
 bool Students_TryRemove(int index)
 {
-    if (!isIndexInRange(index) || !g_students[index])
+    if (!isIndexInRange(index))
     {
         return false;
     }
 
-    free(g_students[index]);
-    g_students[index] = NULL;
-    g_top = index;
-    g_count--;
-    return true;
+    int i = 0;
+    int studentIndex = 0;
+
+    while (i < MAX_STUDENTS)
+    {
+        Student* current = g_students[i];
+        if (current)
+        {
+            if (studentIndex == index)
+            {
+                free(g_students[index]);
+                g_students[index] = NULL;
+                g_top = index;
+                g_count--;
+                return true;
+            }
+
+            studentIndex++;
+        }
+
+        i++;
+    }
+
+    return false;
 }
 
 bool Students_TryGetIndexByStudent(const Student* student, int* outputIndex)
@@ -297,15 +316,33 @@ bool Students_TryGetIndexByStudent(const Student* student, int* outputIndex)
     return false;
 }
 
-bool Students_TrySearchByIndex(int index, Student* output)
+bool Students_TrySearchByIndex(int index, Student** output)
 {
-    if (!isIndexInRange(index) || !g_students[index] || !output)
+    if (!isIndexInRange(index))
     {
         return false;
     }
 
-    *output = *(g_students[index]);
-    return true;
+    int loopCounter = 0;
+    int studentNumber = 0;
+
+    while (loopCounter < MAX_STUDENTS)
+    {
+        Student* current = g_students[loopCounter];
+        if (current)
+        {
+            if (studentNumber == index)
+            {
+                if (output) *output = current;
+                return true;
+            }
+            studentNumber++;
+        }
+
+        loopCounter++;
+    }
+
+    return false;
 }
 
 void Students_PrintStudent(const Student* student)

@@ -158,11 +158,37 @@ int requestSize(const char* nullableMsg)
     return input;
 }
 
-void requestString(int length, char* output, const char* nullableMsg)
+bool tryRequestSize(const char* nullableMsg, int* output)
 {
+    printNullable(nullableMsg);
+    
+    int input = 0;
+    requestNumber(NumType_Int, &input, NULL);
+    
+    if (input <= 0)
+    {
+        return false;
+    }
+
+    *output = input;
+    return true;
+}
+
+char* requestString(int length, char* output, const char* nullableMsg)
+{
+    if (!output)
+    {
+        return NULL;
+    }
+    
     printNullable(nullableMsg);
 
     char buffer[length];
+    if (fseek(stdin, 0, SEEK_END) > 0)
+    {
+        getchar();
+        rewind(stdin);
+    }
     fgets(buffer, length, stdin);
     
     if (buffer[length - 2] == '\n')
@@ -170,6 +196,7 @@ void requestString(int length, char* output, const char* nullableMsg)
         buffer[length - 2] = '\0';
     }
     snprintf(output, strlen(buffer), "%s", buffer);
+    return output;
 }
 
 void requestDoubleArray(int length, double* array, const char* nullableMsg, bool showElemMsgs)
@@ -279,7 +306,11 @@ static void requestNumber(NumType type, void* output, const char* nullableMsg, .
     va_start(params, nullableMsg);
     vprintNullable(nullableMsg, &params);
 
-    scanf(NumberInfoTable[type].formatSpecifier, output);
+    char buffer[8];
+    sprintf(buffer, " %s", NumberInfoTable[type].formatSpecifier);
+
+    scanf(buffer, output);
+    getchar();
 
     va_end(params);
 }

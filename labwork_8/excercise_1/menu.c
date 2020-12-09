@@ -8,6 +8,8 @@
 #include "student_database.h"
 #include "menu.h"
 
+#define INPUT_BUFFER_SIZE (64)
+
 typedef enum
 {
     Choice_Add,
@@ -28,6 +30,7 @@ typedef struct
 ========================*/
 
 static StudentFieldIndex requestFieldIndex(void);
+static void printDivider(void);
 static void printMenu(void);
 static void requestStudent(Student* output);
 
@@ -49,7 +52,7 @@ void Sort(void)
 void Search(void)
 {
     StudentFieldIndex field = requestFieldIndex();
-    char buffer[64];
+    char buffer[INPUT_BUFFER_SIZE];
     requestString(sizeof(buffer), buffer, "Enter desired value: ");
     
     int outputLength = Students_GetCount();
@@ -58,7 +61,7 @@ void Search(void)
 
     int howManyFound = Students_SearchByField(field, buffer, outputLength, outputStudents, outputIndices);
     printf("howManyFound: %i\n", howManyFound);
-    puts("----------------");
+    printDivider();
     if (howManyFound > 0)
     {
         for (int i = 0; i < howManyFound; i++)
@@ -71,7 +74,7 @@ void Search(void)
     {
         puts("The search has yielded no result.");
     }
-    puts("----------------");
+    printDivider();
 
     free(outputStudents);
     free(outputIndices);
@@ -79,34 +82,60 @@ void Search(void)
 
 void Change(void)
 {
-    
+    int index = requestSize("Enter the student's index: ") - 1;
+    printDivider();
 
+    Student* s = NULL;
+    bool found = Students_TrySearchByIndex(index, &s);
+    if (!found)
+    {
+        puts("No student with such an index was found.");
+        return;
+    }
+
+    StudentFieldIndex field = requestFieldIndex();
+
+    char buffer[INPUT_BUFFER_SIZE];
+    requestString(sizeof(buffer), buffer, "Enter desired value: ");
+    strncpy(s->fields[field], buffer, MAX_STUDENT_FIELD_SIZE);
+    puts("Field changed.");
 }
 
 void Remove(void)
 {
+    int index = requestSize("Enter the student's index: ") - 1;
+    printDivider();
 
+    bool removed = Students_TryRemove(index);
+    if (!removed)
+    {
+        puts("No student with such an index was found.");
+        return;
+    }
+    puts("Student removed.");
 }
 
 void Print(void)
 {
     puts("");
-    puts("----------------");
+    printDivider();
     Students_Print();
-    puts("----------------");
+    printDivider();
 }
 
 /*========================
           MENU
 ========================*/
 
-#define MAX_MENU_OPTIONS (4)
+#define MAX_MENU_OPTIONS (6)
 
 static const MenuOption menu[MAX_MENU_OPTIONS] =
 {
     {"Add student",                 &Add    },
     {"Sort students by field",      &Sort   },
     {"Search students by field",    &Search },
+    {"Change student by index",     &Change },
+    {"Remove student by index",     &Remove },
     {"Print students",              &Print  }
 };
 
@@ -116,7 +145,7 @@ static const MenuOption menu[MAX_MENU_OPTIONS] =
 
 static StudentFieldIndex requestFieldIndex(void)
 {
-    char buffer[64];
+    char buffer[INPUT_BUFFER_SIZE];
 
     printf("Available fields:\n");
     for (int i = 0; i < MAX_STUDENT_FIELDS; i++)
@@ -144,8 +173,15 @@ static StudentFieldIndex requestFieldIndex(void)
     return choice - 1;
 }
 
+static void printDivider(void)
+{
+    puts("----------------");   
+}
+
 static void printMenu(void)
 {
+    puts("");
+
     int i = 0;
     const char* format = "%i. %s\n";
     for (; i < MAX_MENU_OPTIONS; i++)
@@ -162,19 +198,19 @@ static void requestStudent(Student* output)
         return;
     }
 
-    char stringBuffer[64];
+    char buffer[INPUT_BUFFER_SIZE];
 
     for (int i = 0; i < MAX_STUDENT_FIELDS; i++)
     {
         printf("Enter the ");
-        printf("%s: ", Students_FieldNameToString(i, true, sizeof(stringBuffer), stringBuffer));
+        printf("%s: ", Students_FieldNameToString(i, true, sizeof(buffer), buffer));
 
-        stringBuffer[0] = '\0';
-        while (strlen(stringBuffer) < 1)
+        buffer[0] = '\0';
+        while (strlen(buffer) < 1)
         {
-            requestString(sizeof(stringBuffer), stringBuffer, NULL);
+            requestString(sizeof(buffer), buffer, NULL);
         }
-        strncpy(output->fields[i], stringBuffer, MAX_STUDENT_FIELD_SIZE);
+        strncpy(output->fields[i], buffer, MAX_STUDENT_FIELD_SIZE);
     }
 }
 
@@ -184,7 +220,7 @@ void loop(void)
 {
     bool exit = false;
     int choice = 0;
-    bool requestSizeResult = false;
+    bool inputSuccess = false;
 
     while (!exit)
     {
@@ -193,8 +229,8 @@ void loop(void)
 
         retryInput:
 
-        requestSizeResult = tryRequestSize(NULL, &choice);
-        while (!requestSizeResult)
+        inputSuccess = tryRequestSize(NULL, &choice);
+        while (!inputSuccess)
         {
             goto retryInput;
         }
@@ -204,6 +240,7 @@ void loop(void)
         }
         else if ((choice < MAX_MENU_OPTIONS + 1) && choice > 0)
         {
+            puts("");
             menu[choice - 1].action();
         }
         else

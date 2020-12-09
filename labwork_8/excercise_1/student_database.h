@@ -10,7 +10,7 @@
 bool        Students_TryAdd                 (const Student* student, int* outputIndex);
 bool        Students_TryRemove              (int index);
 bool        Students_TryGetIndexByStudent   (const Student* student, int* outputIndex);
-bool        Students_TrySearchByIndex       (int index, Student* output);
+bool        Students_TrySearchByIndex       (int index, Student** output);
 void        Students_PrintStudent           (const Student* student);
 void        Students_Print                  (void);
 void        Students_SortByField            (StudentFieldIndex field);
