@@ -1,0 +1,3 @@
+#ifndef DATA_DATABASE_H
+#define DATA_DATABASE_H
+#endif // DATA_DATABASE_H
