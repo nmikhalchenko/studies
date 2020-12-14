@@ -3,28 +3,40 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "data.h"
+#include "data_io.h"
 
 
 /*  T O D O   */
-/*
-    Rewrite the write and read functions according
-    to the current state of data.h and data.c.
-*/
 
+#define FILENAME ("datafile")
+
+void debugPrint(const DataReference data)
+{
+    printf("DATA:\n--------\n");
+    dataPrint(data, -20);
+    printf("--------\n\n");
+}
 
 int main(void)
 {
     Data data = {0};
+    dataSetField(&data, FieldName_fullName, "John Smith");
+    dataSetField(&data, FieldName_libCardNumber, "25");
+    dataSetField(&data, FieldName_bookName, "The Holy Bible");
+    dataSetField(&data, FieldName_returnTerm, "31.12.2020");
 
-    char c = 'a';
-    for (int i = 0; i < MAX_DATA_FIELDS; i++)
-    {
-        dataSetField(&data, i, &c);
-        c++;
-    }
+    debugPrint(&data);
 
-    dataPrint(&data, -20);
+    DataFile file = dataFileOpen(FILENAME, DataFileMode_write);
+    dataFileWrite(file, &data);
+    dataFileClose(&file);
+
+    dataFileReopen(FILENAME, DataFileMode_read, &file);
+    Data another = {0};
+    dataFileRead(file, &another);
+    
+    debugPrint(&another);
+
 
     return 0;
 }
