@@ -1,12 +1,18 @@
+#include <errno.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h>
 
 #include "data_io.h"
 
-#define DATA_FILE_NAME ("datafile")
 #define DATA_TOTAL_SIZE (MAX_DATA_FIELD_SIZE * MAX_DATA_FIELDS + 1)
 
-#define MAX_DATA_IO_MODES (3)
+struct DataFile
+{
+    FILE* file;
+    DataFileMode mode;
+
+};
 
 static const char* const g_dataIOModeStrings[MAX_DATA_IO_MODES] =
 {
@@ -15,59 +21,150 @@ static const char* const g_dataIOModeStrings[MAX_DATA_IO_MODES] =
     "w"
 };
 
-static bool performDataIO(DataFile file, DataFileMode mode, const DataReference input, DataReference output);
-static bool readData(DataReference output, FILE* file);
-static bool writeData(const DataReference data, FILE* file);
+static bool isDataFileValid(const struct DataFile* file);
+static bool performDataIO(const struct DataFile* file, DataFileMode mode, const Data* input, Data* output);
+static bool readData(Data* output, FILE* file);
+static bool writeData(const Data* data, FILE* file);
 
-DataFile dataFileOpen(const char* filename, DataFileMode mode)
+struct DataFile* dataFileOpen(const char* filename, DataFileMode mode)
 {
-    DataFile dataFile = {.file = NULL, .mode = mode};
-    
     const char* openmode = g_dataIOModeStrings[mode];
     FILE* file = fopen(filename, openmode);
-    if (file)
+    if (!file)
     {
-        dataFile.file = file;
+        return NULL;
     }
 
+    struct DataFile* dataFile = (struct DataFile*)malloc(sizeof(struct DataFile));
+    dataFile->file = file;
+    dataFile->mode = mode;
+    
     return dataFile;
 }
 
 bool dataFileReopen(const char* filename, DataFileMode mode, DataFile* file)
 {
-    dataFileClose(file);
-    *file = dataFileOpen(filename, mode);
+    if (!isDataFileValid(file))
+    {
+        return false;
+    }
 
-    return file->file != NULL;
+    FILE* newFile = fopen(filename, g_dataIOModeStrings[mode]);
+    if (!newFile)
+    {
+        return false;
+    }
+
+    fclose(file->file);
+    file->file = newFile;
+    file->mode = mode;
+
+    return true;
 }
 
 void dataFileClose(DataFile* file)
 {
-    if (file->file)
+    if (isDataFileValid(file))
     {
         fclose(file->file);
+        free(file);
         file->file = NULL;
     }
 }
 
-bool dataFileAppend(DataFile file, const DataReference data)
+int dataFileCount(const DataFile* file)
+{
+    if (!isDataFileValid(file) || file->mode != DataFileMode_read)
+    {
+        return -1;
+    }
+
+    FILE* f = file->file;
+    int count = 0;
+    bool error = false;
+    bool eof = false;
+
+    fseek(f, 0, SEEK_SET);
+
+    int seekResult = 0;
+    while ((seekResult = fseek(f, DATA_TOTAL_SIZE - 1, SEEK_CUR)) >= 0 && !error && !eof)
+    {
+        printf("seekResult: %i\n", seekResult);
+        int c = fgetc(f);
+        switch (c)
+        {
+            case '\n':
+                puts("newline!");
+                count++;
+                break;
+            
+            case EOF:
+                eof = true;
+                break;
+
+            default:
+                error = true;
+                break;
+        }
+    }
+    if (error)
+    {
+        return -1;
+    }
+    
+    return count;
+}
+
+bool dataFileGoto(const DataFile* file, int index)
+{
+    if (!isDataFileValid(file))
+    {
+        return false;
+    }
+
+    rewind(file->file);
+
+    int count = dataFileCount(file);
+    if (index >= count)
+    {
+        return false;
+    }
+
+    for (int i = 0; i < count; i++)
+    {
+        bool readResult = dataFileRead(file, NULL);
+        if (!readResult)
+        {
+            break;
+        }
+    }
+
+    return true;
+}
+
+bool dataFileAppend(const DataFile* file, const Data* data)
 {
     return performDataIO(file, DataFileMode_append, data, NULL);
 }
 
-bool dataFileRead(DataFile file, DataReference output)
+bool dataFileRead(const DataFile* file, Data* output)
 {
     return performDataIO(file, DataFileMode_read, NULL, output);
 }
 
-bool dataFileWrite(DataFile file, const DataReference data)
+bool dataFileWrite(const DataFile* file, const Data* data)
 {
     return performDataIO(file, DataFileMode_write, data, NULL);
 }
 
-static bool performDataIO(DataFile file, DataFileMode mode, const DataReference input, DataReference output)
+static bool isDataFileValid(const DataFile* file)
 {
-    if (!file.file || file.mode != mode)
+    return file && file->file;
+}
+
+static bool performDataIO(const DataFile* file, DataFileMode mode, const Data* input, Data* output)
+{
+    if (!isDataFileValid(file) || file->mode != mode)
     {
         return false;
     }
@@ -80,17 +177,17 @@ static bool performDataIO(DataFile file, DataFileMode mode, const DataReference 
             if (!output)
             {
                 Data data = {0};
-                operationResult = readData(&data, file.file);
+                operationResult = readData(&data, file->file);
             }
             else
             {
-                operationResult = readData(output, file.file);
+                operationResult = readData(output, file->file);
             }
             break;
 
         case DataFileMode_append:
         case DataFileMode_write:
-            operationResult = writeData(input, file.file);
+            operationResult = writeData(input, file->file);
             break;
             
         default:
@@ -101,7 +198,7 @@ static bool performDataIO(DataFile file, DataFileMode mode, const DataReference 
     return operationResult;
 }
 
-static bool readData(DataReference output, FILE* file)
+static bool readData(Data* output, FILE* file)
 {
     size_t read = 0;
     for (int i = 0; i < MAX_DATA_FIELDS; i++)
@@ -126,7 +223,7 @@ static bool readData(DataReference output, FILE* file)
     return true;
 }
 
-static bool writeData(const DataReference data, FILE* file)
+static bool writeData(const Data* data, FILE* file)
 {
     // A hack to possibly read files easier that might be useful later:
     const unsigned char separator = '\n';

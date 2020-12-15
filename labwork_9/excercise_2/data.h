@@ -15,8 +15,6 @@ typedef struct
 
 } Data;
 
-typedef Data* DataReference;
-
 typedef bool (*TypeValidator)(const char* value);
 
 typedef enum
@@ -54,8 +52,8 @@ extern const TypeInfo g_typeInfoTable[MAX_DATA_TYPES];
 extern const FieldInfo g_fieldInfoTable[MAX_DATA_FIELDS];
 
 // These must ALWAYS be used for reading and writing to fields.
-bool dataSetField(DataReference data, FieldName field, const char* value);
-const char* dataGetField(const DataReference data, FieldName field);
-void dataPrint(const DataReference data, int padding);
+bool dataSetField(Data* data, FieldName field, const char* value);
+const char* dataGetField(const Data* data, FieldName field);
+void dataPrint(const Data* data, int padding);
 
 #endif // DATA_H

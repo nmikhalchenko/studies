@@ -26,7 +26,7 @@ const FieldInfo g_fieldInfoTable[MAX_DATA_FIELDS] =
     {   .name = "Return Term",          .type = FieldType_string    }
 };
 
-bool dataSetField(DataReference data, FieldName field, const char* value)
+bool dataSetField(Data* data, FieldName field, const char* value)
 {
     if (!value)
     {
@@ -42,13 +42,13 @@ bool dataSetField(DataReference data, FieldName field, const char* value)
     return valid;
 }
 
-const char* dataGetField(const DataReference data, FieldName field)
+const char* dataGetField(const Data* data, FieldName field)
 {
     
     return data->fields[field];
 }
 
-void dataPrint(const DataReference data, int padding)
+void dataPrint(const Data* data, int padding)
 {
     padding = padding > 999 ? 999 : padding;
 
