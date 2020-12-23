@@ -16,9 +16,10 @@ struct DataFile
 
 static const char* const g_dataIOModeStrings[MAX_DATA_IO_MODES] =
 {
-    "a",
-    "r",
-    "w"
+    [DataFileMode_none] = "\0",
+    [DataFileMode_append] = "a",
+    [DataFileMode_read] = "r",
+    [DataFileMode_write] = "w"
 };
 
 static bool isDataFileValid(const struct DataFile* file);
@@ -62,6 +63,16 @@ bool dataFileReopen(const char* filename, DataFileMode mode, DataFile* file)
     return true;
 }
 
+void dataFileRewind(DataFile* file)
+{
+    if (!file)
+    {
+        return;
+    }
+    
+    rewind(file->file);
+}
+
 void dataFileClose(DataFile* file)
 {
     if (isDataFileValid(file))
@@ -72,6 +83,16 @@ void dataFileClose(DataFile* file)
     }
 }
 
+DataFileMode dataFileGetMode(const DataFile* file)
+{
+    if (!isDataFileValid(file))
+    {
+        return DataFileMode_none;
+    }
+
+    return file->mode;
+}
+
 int dataFileCount(const DataFile* file)
 {
     if (!isDataFileValid(file) || file->mode != DataFileMode_read)
@@ -80,6 +101,7 @@ int dataFileCount(const DataFile* file)
     }
 
     FILE* f = file->file;
+    int curpos = ftell(f);
     int count = 0;
     bool error = false;
     bool eof = false;
@@ -89,12 +111,10 @@ int dataFileCount(const DataFile* file)
     int seekResult = 0;
     while ((seekResult = fseek(f, DATA_TOTAL_SIZE - 1, SEEK_CUR)) >= 0 && !error && !eof)
     {
-        printf("seekResult: %i\n", seekResult);
         int c = fgetc(f);
         switch (c)
         {
             case '\n':
-                puts("newline!");
                 count++;
                 break;
             
@@ -112,6 +132,7 @@ int dataFileCount(const DataFile* file)
         return -1;
     }
     
+    fseek(f, curpos, SEEK_SET);
     return count;
 }
 
@@ -121,16 +142,16 @@ bool dataFileGoto(const DataFile* file, int index)
     {
         return false;
     }
-
-    rewind(file->file);
-
+    
     int count = dataFileCount(file);
     if (index >= count)
     {
         return false;
     }
 
-    for (int i = 0; i < count; i++)
+    rewind(file->file);
+
+    for (int i = 0; i < index; i++)
     {
         bool readResult = dataFileRead(file, NULL);
         if (!readResult)

@@ -28,7 +28,6 @@ typedef struct
 {
     TypeValidator validator;
     const char* defaultValue;
-    const char* formatSpecifier;
 
 } TypeInfo;
 
@@ -52,8 +51,13 @@ extern const TypeInfo g_typeInfoTable[MAX_DATA_TYPES];
 extern const FieldInfo g_fieldInfoTable[MAX_DATA_FIELDS];
 
 // These must ALWAYS be used for reading and writing to fields.
+Data dataBlank(void);
 bool dataSetField(Data* data, FieldName field, const char* value);
+bool dataSetFieldToDefault(Data* data, FieldName field);
 const char* dataGetField(const Data* data, FieldName field);
+bool dataEqualsField(const Data* left, const Data* right, FieldName field);
+bool dataEquals(const Data* left, const Data* right);
+bool dataCopy(Data* dest, Data* src);
 void dataPrint(const Data* data, int padding);
 
 #endif // DATA_H

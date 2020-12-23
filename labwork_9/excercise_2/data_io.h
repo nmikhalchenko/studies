@@ -5,9 +5,10 @@
 
 #include "data.h"
 
-#define MAX_DATA_IO_MODES (3)
+#define MAX_DATA_IO_MODES (4)
 typedef enum
 {
+    DataFileMode_none,
     DataFileMode_append,
     DataFileMode_read,
     DataFileMode_write
@@ -16,9 +17,11 @@ typedef enum
 
 typedef struct DataFile DataFile;
 
-struct DataFile* dataFileOpen(const char* filename, DataFileMode mode);
+DataFile* dataFileOpen(const char* filename, DataFileMode mode);
 bool dataFileReopen(const char* filename, DataFileMode mode, DataFile* file);
+void dataFileRewind(DataFile* file);
 void dataFileClose(DataFile* file);
+DataFileMode dataFileGetMode(const DataFile* file);
 int dataFileCount(const DataFile* file);
 bool dataFileGoto(const DataFile* file, int index);
 bool dataFileAppend(const DataFile* file, const Data* data);

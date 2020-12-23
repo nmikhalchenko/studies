@@ -3,12 +3,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "data_io.h"
+#include "data_menu.h"
 
 #define FILENAME ("datafile")
 
 int main(void)
 {
+    startMenu();
 
     return 0;
 }

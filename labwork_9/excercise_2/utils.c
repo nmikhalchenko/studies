@@ -5,6 +5,16 @@
 
 #include "utils.h"
 
+int min(int a, int b)
+{
+    return a < b ? a : b;
+}
+
+int max(int a, int b)
+{
+    return a > b ? a : b;
+}
+
 /* Seems like a weird approach at first, but
    see "https://stackoverflow.com/questions/1068849/how-do-i-determine-the-number-of-digits-of-an-integer-in-c",
    this one seems to be the fastest and the simplest at once. */
