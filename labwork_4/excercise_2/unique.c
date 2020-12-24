@@ -46,10 +46,10 @@ static UniqueArrayInfo getUnique(int* inputArr, size_t arrSize)
         }
     }
 
-    size_t outSize = 0;
+    size_t outSize = knownBufTop;
 
-    for (size_t i = 0; i < knownBufTop; i++)
-        outSize += !knownNumbersBuf[i].isRepeated;
+    // for (size_t i = 0; i < knownBufTop; i++)
+    //     outSize += !knownNumbersBuf[i].isRepeated;
 
     UniqueArrayInfo info;
     info.uniqueArray = (int*)calloc(outSize, sizeof(int));
@@ -58,9 +58,8 @@ static UniqueArrayInfo getUnique(int* inputArr, size_t arrSize)
     size_t uniqueArrayTop = 0;
 
     for (size_t i = 0; i < knownBufTop; i++)
-        if (!knownNumbersBuf[i].isRepeated)
-            info.uniqueArray[uniqueArrayTop++] = 
-                knownNumbersBuf[i].number;
+        info.uniqueArray[uniqueArrayTop++] = 
+            knownNumbersBuf[i].number;
 
     free((void*)knownNumbersBuf);
     knownNumbersBuf = NULL;

@@ -3,9 +3,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "shared_code/shared_code.h"
 #include "unique.h"
 
-#define ARRSIZE 5
+#define ARRSIZE 10
 
 void displayArray(int* arr, size_t size)
 {
@@ -15,11 +16,11 @@ void displayArray(int* arr, size_t size)
 
 int main(void)
 {
-    // Наш "какой-то" массив.
-    int in[ARRSIZE] = {1, 2, 2, 3, 4};
+    int in[ARRSIZE];
+    requestIntArray(ARRSIZE, in, "Enter array:\n", true);
 
-    puts("Изначальный массив:");
-    displayArray(in, ARRSIZE);
+    puts("The array:");
+    printIntArray(ARRSIZE, in, true);
     puts("");
 
     int* out = NULL;
@@ -27,8 +28,8 @@ int main(void)
 
     extractUnique(in, ARRSIZE, &out, &outSize);
 
-    puts("Массив с вырезанными повторяющимися элементами:");
-    displayArray(out, outSize);
+    puts("Without duplicate elements:");
+    printIntArray(outSize, out, true);
 
     free(out);
     out = NULL;

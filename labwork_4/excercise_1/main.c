@@ -3,25 +3,21 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "shared_code/shared_code.h"
 #include "unique.h"
 
-#define ARRSIZE 11
-
-void displayArray(int* arr, size_t size)
-{
-    for (int i = 0; i < size; i++)
-        printf("%i\n", arr[i]);
-}
+#define ARRSIZE 10
 
 int main(void)
 {
-    int arr1[ARRSIZE] = {2, 2, 3, 6, 6, 5, 7, 10, 20, 20, 20};
+    int arr1[ARRSIZE];
+    requestIntArray(ARRSIZE, arr1, "Enter array:\n", true);
 
-    puts("Изначальный массив:");
-    displayArray(arr1, ARRSIZE);
+    puts("The array:");
+    printIntArray(ARRSIZE, arr1, false);
     puts("");
 
-    puts("Уникальные элементы этого массива:");
+    puts("Unique elements of the array:");
     printUnique(arr1, ARRSIZE);
 
     return 0;

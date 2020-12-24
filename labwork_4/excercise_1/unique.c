@@ -88,7 +88,8 @@ void printUnique(int* arr, int size)
     UniqueArray uniques = getUniqueElements(arr, size);
     for (int i = 0; i < uniques.size; i++)
     {
-        printf("%i\n", uniques.array[i]);
+        printf("%i ", uniques.array[i]);
     }
+    puts("");
     freeUniqueArray(&uniques);
 }
